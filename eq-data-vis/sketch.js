@@ -125,7 +125,7 @@ var quake = function(time, lat, long, mag, depth, place) {
          "Latitude: " + this.lat + "\n" +
          "Longitude: " + this.long + "\n" +
          "Magnitude: " + this.mag + "\n" +
-         "Depth: " + this.depth + "\n";
+         "Depth: " + this.depth + "km\n";
     // Attach place if it's not empty
     if (this.place != '') {
       s = s.concat("Place: " + this.place);
@@ -184,7 +184,7 @@ function setup() {
   minText.position(100, 90);
 
   // Minimum magnitude slider
-  minMagSlider = createSlider(0.0, 10.0, 0.0, 0.1);
+  minMagSlider = createSlider(0.0, 10.0, 0, 0.1);
   minMagSlider.position(20, 110);
   minMagSlider.style('width', '120px');
   minMagSlider.input(updateSlider);
@@ -200,7 +200,7 @@ function setup() {
   maxText.position(100, 140);
 
   // Maximum magnitude slider
-  maxMagSlider = createSlider(0.0, 10.0, 10.0, 0.1);
+  maxMagSlider = createSlider(0.0, 10.0, 10, 0.1);
   maxMagSlider.position(20, 160);
   maxMagSlider.style('width', '120px');
   maxMagSlider.input(updateSlider);
