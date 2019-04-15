@@ -40,7 +40,6 @@ var fadeToggle;
 
 // Earthquakes list
 var earthquakes = [];
-var activeInfos = [];
 
 // Booleans
 var bInsideCanvas = false;
@@ -60,6 +59,7 @@ var filterMinMag = 0.0;
 var filterMaxMag = 10.0;
 var dateRange = 14;
 var dateTarget = new Date(START_DATE);
+var activeInfo;
 
 
 // Earthquake object
@@ -80,8 +80,11 @@ var quake = function(time, lat, long, mag, depth, place) {
 
   this.onClick = function() {
     this.showInfo = true;
-    // Add to list of active infos
-    activeInfos.push(this);
+    // Become new active info
+    if (activeInfo != null) {
+      activeInfo.showInfo = false;
+    }
+    activeInfo = this;
   }
 
   this.draw = function() {
@@ -117,12 +120,18 @@ var quake = function(time, lat, long, mag, depth, place) {
     rect(this.x, this.y, 300/scalar, 140/scalar);
     textSize(14/scalar);
     fill(0,0,0);
-    text(printDatetime(this.time) + "\n" +
-         "latitude: " + this.lat + "\n" +
-         "longitude: " + this.long + "\n" +
-         "magnitude: " + this.mag + "\n" +
-         "depth: " + this.depth + "\n" +
-         "place: " + this.place, this.x+4/scalar, this.y+4/scalar, 300/scalar, 140/scalar);
+    // Build info string
+    let s = printDatetime(this.time) + "\n" +
+         "Latitude: " + this.lat + "\n" +
+         "Longitude: " + this.long + "\n" +
+         "Magnitude: " + this.mag + "\n" +
+         "Depth: " + this.depth + "\n";
+    // Attach place if it's not empty
+    if (this.place != '') {
+      s = s.concat("Place: " + this.place);
+    }
+
+    text(s, this.x+4/scalar, this.y+4/scalar, 300/scalar, 140/scalar);
   }
 }
 
@@ -274,11 +283,8 @@ function draw() {
     earthquakes[i].draw();
   }
 
-  // Loop again to draw tooltip info on top
-  for (let i = 0; i < earthquakes.length; i++) {
-    if (earthquakes[i].showInfo) {
-      earthquakes[i].drawInfo();
-    }
+  if (activeInfo != null && activeInfo.showInfo) {
+    activeInfo.drawInfo();
   }
 }
 
@@ -310,12 +316,12 @@ function updateInput() {
   var check = dateRangeInput.value();
 
   // Return early and do nothing if not int
-  if (isNaN(check) || isNaN(parseInt(check))) {
+  if (isNaN(check) || isNaN(parseFloat(check))) {
     return;
   }
 
   // Update days difference
-  dateRange = parseInt(check);
+  dateRange = parseFloat(check);
 
   applyFilter();
 }
@@ -367,7 +373,7 @@ function applyFilter() {
         // Not within magnitude filter
         live = false;
       }
-      if (bDateFilter && delta >  dateRange) {
+      if (bDateFilter && delta > dateRange) {
         // Not within date filter
         live = false;
       }
@@ -466,11 +472,9 @@ function mouseReleased() {
         return;
       }
     }
-    // No earthquake clicked, turn off all active infos
-    while (activeInfos.length > 0) {
-      let eq = activeInfos.pop();
-      eq.showInfo = false;
-    }
+    // Turn off tooltip info if nothing was clicked
+    activeInfo.showInfo = false;
+    activeInfo = null;
   }
 
   // Reset flags
